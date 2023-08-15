@@ -55,7 +55,7 @@ public class ShowActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.menuUpdate) {
             String data = dataList.get(position); // Ambil data pada posisi yang di-klik
-            String id = data.substring(data.indexOf("ID: ") + 4, data.indexOf("\n")); // Ambil ID dari data
+            String id = data.substring(0, data.indexOf(" ")); // Ambil ID dari data
 
             Intent intentUpdate = new Intent(ShowActivity.this, UpdateActivity.class);
             intentUpdate.putExtra("id_mahasiswa", id); // Kirim ID ke UpdateActivity
@@ -63,14 +63,23 @@ public class ShowActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.menuDelete) {
             String data = dataList.get(position); // Ambil data pada posisi yang di-klik
-            String id = data.substring(data.indexOf("ID: ") + 4, data.indexOf("\n")); // Ambil ID dari data
+            String id = data.substring(0, data.indexOf(" ")); // Ambil ID dari data
 
             new DeleteDataFromApiTask().execute(id); // Hapus data dengan ID yang dipilih
+            return true;
+        } else if (item.getItemId() == R.id.menuDetail) {
+            String data = dataList.get(position); // Ambil data pada posisi yang di-klik
+            String id = data.substring(0, data.indexOf(" ")); // Ambil ID dari data
+
+            Intent intentDetail = new Intent(ShowActivity.this, DetailActivity.class);
+            intentDetail.putExtra("id_mahasiswa", id); // Kirim ID ke DetailActivity
+            startActivity(intentDetail);
             return true;
         } else {
             return super.onContextItemSelected(item);
         }
     }
+
 
     private class DeleteDataFromApiTask extends AsyncTask<String, Void, String> {
         private final String API_URL = "https://jmp.surabayawebtech.com/api/mahasiswa";
@@ -151,11 +160,9 @@ public class ShowActivity extends AppCompatActivity {
                         JSONObject dataObject = dataArray.getJSONObject(i);
                         String id = dataObject.getString("id");
                         String nama = dataObject.getString("nama");
-                        String umur = dataObject.getString("umur");
-                        String alamat = dataObject.getString("alamat");
 
                         // Tampilkan data dalam format yang Anda inginkan
-                        String dataString = "ID: " + id + "\nNama: " + nama + "\nUmur: " + umur + "\nAlamat: " + alamat;
+                        String dataString = id + " Nama: " + nama;
                         dataList.add(dataString);
                     }
 
