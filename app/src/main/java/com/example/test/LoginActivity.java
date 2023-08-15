@@ -93,30 +93,20 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            // Handle response from the API here
+            // test response
             Log.d("API Response", result);
 
             try {
                 JSONObject responseJson = new JSONObject(result);
                 String accessToken = responseJson.getString("access_token");
-
-                // Save the access_token to SharedPreferences for later use
+                // simpan token
                 SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("access_token", accessToken);
                 editor.apply();
-
-                // Assuming your API returns a JSON object with a field "success"
-//                boolean isSuccess = responseJson.getBoolean("access_token");
-//                Log.d("test Response", isSuccess);
-
-//                if (result) {
+                //pindah halaman menu
                 Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
                 startActivity(intent);
-//                } else {
-                // Handle the case where login is not successful
-                // For example, show an error message to the user
-//                }
             } catch (JSONException e) {
                 e.printStackTrace();
                 // Handle JSON parsing error here

@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -40,14 +43,14 @@ public class InputActivity extends AppCompatActivity {
                 String umur = umurEditText.getText().toString();
                 String alamat = alamatEditText.getText().toString();
 
+                JSONObject postData = new JSONObject();
                 try {
-                    JSONObject postData = new JSONObject();
                     postData.put("nama", nama);
                     postData.put("umur", umur);
                     postData.put("alamat", alamat);
 
                     new SendDataTask().execute(postData.toString());
-                } catch (Exception e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -69,23 +72,23 @@ public class InputActivity extends AppCompatActivity {
                 connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                 connection.setDoOutput(true);
 
-                OutputStream os = connection.getOutputStream();
-                os.write(data.getBytes("UTF-8"));
-                os.close();
+                try (OutputStream os = connection.getOutputStream()) {
+                    os.write(data.getBytes("UTF-8"));
+                }
 
                 int responseCode = connection.getResponseCode();
 
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    String inputLine;
-                    StringBuilder responseBuilder = new StringBuilder();
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                        String inputLine;
+                        StringBuilder responseBuilder = new StringBuilder();
 
-                    while ((inputLine = in.readLine()) != null) {
-                        responseBuilder.append(inputLine);
+                        while ((inputLine = in.readLine()) != null) {
+                            responseBuilder.append(inputLine);
+                        }
+
+                        response = responseBuilder.toString();
                     }
-                    in.close();
-
-                    response = responseBuilder.toString();
                 } else {
                     response = "Error: " + responseCode;
                 }
@@ -100,9 +103,10 @@ public class InputActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             try {
                 JSONObject responseJson = new JSONObject(result);
-                String nama = responseJson.optString("nama");
+                JSONObject dataJson = responseJson.getJSONObject("data");
+                String nama = dataJson.optString("nama");
 
-                Toast.makeText(InputActivity.this, nama, Toast.LENGTH_SHORT).show();
+                Toast.makeText(InputActivity.this, "Nama: " + nama, Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(InputActivity.this, MenuActivity.class);
                 startActivity(intent);
